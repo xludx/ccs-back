@@ -1,0 +1,43 @@
+version: '2.4'
+
+services:
+  front:
+    image: bretfisher/jekyll-serve
+    volumes:
+      - ../ccs-front/:/site
+    ports:
+      - 4444:4000
+
+  back:
+    build:
+       dockerfile: .docker/php-fpm/Dockerfile
+       context: .
+    command: /bin/docker-entrypoint/run.sh
+    volumes:
+      - .:/usr/src/ccs
+      - .:/var/www/current
+    ports:
+      - 4445:4000
+
+  database:
+    image: mariadb:latest
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: 'always'
+    env_file:
+      - .env.docker.database
+    volumes:
+      - dbdata:/var/lib/mysql
+#    ports:
+#      - 3306:3306
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - 9191:80
+    depends_on:
+      - database
+    env_file:
+      - .env.docker.database
+
+volumes:
+  dbdata:

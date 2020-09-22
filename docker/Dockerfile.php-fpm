@@ -1,0 +1,20 @@
+FROM php:7.4.10-fpm
+
+RUN apt-get update && apt-get install -y \
+        cron git php-curl php-fpm php-gd php-mbstring php-mysql php-xml unzip libzip-dev \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+    && docker-php-ext-install mbstring
+    && docker-php-ext-install zip
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
+
+# Use the default production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# Install Composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+WORKDIR /usr/src/ccs
+#CMD [ "php", "./your-script.php" ]
